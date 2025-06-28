@@ -1,22 +1,36 @@
-import '../app/verify/globals.css'
-
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+'use client'
+import './verify/globals.css'
+import '@/styles/typing.css'
+import { Poppins } from 'next/font/google'
+import * as React from 'react'
+import Head from 'next/head'
+import { SessionProvider } from 'next-auth/react'
 import { AuthProvider } from '@/context/AuthContext'
-import SnackbarProvider from '@/context/snackbarContext'
+import { SnackbarContextProvider } from '@/context/snackbarContext'
+import ThemeProvider from '@/theme'
 
-const inter = Inter({ subsets: ['latin'] })
+const poppins = Poppins({
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-poppins'
+})
 
-export const metadata: Metadata = {
-  title: 'My Beegin App',
-  description: 'Login Demo'
-}
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children, session }: { children: React.ReactNode; session?: any }) {
   return (
     <html lang='en'>
-      <body className={inter.className}>
-        <AuthProvider>{children}</AuthProvider>
+      <Head>
+        <title>Beegin</title>
+        <meta name='description' content='Login & Register Demo' />
+      </Head>
+      <body className={poppins.variable}>
+        <AuthProvider>
+          <SessionProvider session={session}>
+            <SnackbarContextProvider>
+              <ThemeProvider>{children}</ThemeProvider>
+            </SnackbarContextProvider>
+          </SessionProvider>
+        </AuthProvider>
       </body>
     </html>
   )
