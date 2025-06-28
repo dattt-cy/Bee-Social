@@ -4,6 +4,7 @@
 /node_modules
 /.pnp
 .pnp.js
+.pnp.js
 
 # testing
 /coverage
@@ -34,6 +35,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# next-video
+videos/*
+!videos/*.json
+!videos/*.js
+!videos/*.ts
+public/_next-video
 
 # next-video
 videos/*
