@@ -34,5 +34,4 @@ export default function RootLayout({ children, session }: { children: React.Reac
       </body>
     </html>
   )
-  )
 }
