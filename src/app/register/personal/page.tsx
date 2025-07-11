@@ -1,28 +1,52 @@
 /* eslint-disable @next/next/no-img-element */
 'use client'
 
-import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import React from 'react'
 // @mui
 import { styled } from '@mui/material/styles'
-import { Container, Typography, Stack, Button, Step, StepLabel, Box, Stepper, IconButton } from '@mui/material'
-import { ArrowBack } from '@mui/icons-material'
+import {
+  Container,
+  Typography,
+  Stack,
+  Button,
+  Step,
+  StepLabel,
+  StepIcon,
+  Box,
+  Stepper,
+  CircularProgress,
+  IconButton
+} from '@mui/material'
+import { ArrowBack, LogoDev } from '@mui/icons-material'
+import { LockPerson, PersonSearch, AddAPhoto, Check, Favorite } from '@mui/icons-material'
 import StepConnector, { stepConnectorClasses } from '@mui/material/StepConnector'
 import { StepIconProps } from '@mui/material/StepIcon'
-
-// hooks & components
-import useResponsive from '@/hooks/useResponsive'
-import Image from 'next/image'
-import Link from 'next/link'
-import RegisterForms from '../RegisterForms'
+import { Register } from '@/types/register'
+import axios from 'axios'
+// import the correct UrlConfig that contains user.signup
+import UrlConfig from '@/config/urlConfig'
 import RegistrationComplete from '../RegistrationSuccess'
+
+// hooks
+import useResponsive from '@/hooks/useResponsive'
+import { useEffect, useState } from 'react'
+
+// auth
+import { signIn, useSession } from 'next-auth/react'
+
+// components
+import Image from 'next/image'
+import RegisterForms from '../RegisterForms'
 
 // assets
 import SignupBanner from '@/assets/signup_banner.jpg'
+import CustomSnackbar from '@/components/common/Snackbar'
+import useSnackbar from '@/context/snackbarContext'
+import { sassFalse } from 'sass'
+import Link from 'next/link'
 import logoMobile from '@/assets/logoMobile.png'
 
-// types
-import { Register } from '@/types/register'
+//----------------------------------------------------------------
 
 const BORDER_RADIUS = '16px'
 
@@ -44,9 +68,20 @@ const StyledRoot = styled('div')(({ theme }) => ({
   }
 }))
 
+const StyledBanner = styled('div')(({ theme }) => ({
+  width: '42%',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  margin: '12px',
+  borderTopLeftRadius: BORDER_RADIUS,
+  borderBottomLeftRadius: BORDER_RADIUS
+}))
+
 const StyledForm = styled(Container)(({ theme }) => ({
   margin: 0,
   minWidth: '58%',
+  width: 'auto',
   height: '100%',
   zIndex: 10,
   borderRadius: BORDER_RADIUS,
@@ -79,12 +114,18 @@ const StyledContent = styled('div')(({ theme }) => ({
 }))
 
 const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
-  [`&.${stepConnectorClasses.alternativeLabel}`]: { top: 22 },
-  [`&.${stepConnectorClasses.active} .${stepConnectorClasses.line}`]: {
-    backgroundImage: 'linear-gradient(95deg, #f59df1 0%, #c474ed 50%, #c89df2 100%)'
+  [`&.${stepConnectorClasses.alternativeLabel}`]: {
+    top: 22
   },
-  [`&.${stepConnectorClasses.completed} .${stepConnectorClasses.line}`]: {
-    backgroundImage: 'linear-gradient(95deg, #f59df1 0%, #c474ed 50%, #c89df2 100%)'
+  [`&.${stepConnectorClasses.active}`]: {
+    [`& .${stepConnectorClasses.line}`]: {
+      backgroundImage: 'linear-gradient( 95deg, #f59df1 0%, #c474ed 50%, #c89df2 100%)'
+    }
+  },
+  [`&.${stepConnectorClasses.completed}`]: {
+    [`& .${stepConnectorClasses.line}`]: {
+      backgroundImage: 'linear-gradient( 95deg, #f59df1 0%, #c474ed 50%, #c89df2 100%)'
+    }
   },
   [`& .${stepConnectorClasses.line}`]: {
     height: 3,
@@ -107,30 +148,68 @@ const ColorlibStepIconRoot = styled('div')<{
   justifyContent: 'center',
   alignItems: 'center',
   ...(ownerState.active && {
-    backgroundImage: 'linear-gradient(136deg, #f59df1 0%, #c474ed 50%, #c89df2 100%)',
+    backgroundImage: 'linear-gradient( 136deg, #f59df1 0%, #c474ed 50%, #c89df2 100%)',
     boxShadow: '0 4px 10px 0 rgba(0,0,0,.25)'
   }),
   ...(ownerState.completed && {
-    backgroundImage: 'linear-gradient(136deg, #f59df1 0%, #c474ed 50%, #c89df2 100%)'
+    backgroundImage: 'linear-gradient( 136deg, #f59df1 0%, #c474ed 50%, #c89df2 100%)'
   })
 }))
 
 function ColorlibStepIcon(props: StepIconProps) {
   const { active, completed, className } = props
+
+  const icons: { [index: string]: React.ReactElement } = {
+    1: <LockPerson />,
+    2: <PersonSearch />,
+    3: <AddAPhoto />,
+    4: <Favorite />
+  }
+
   return (
     <ColorlibStepIconRoot ownerState={{ completed, active }} className={className}>
-      {props.icon}
+      {completed ? <Check className='QontoStepIcon-completedIcon' /> : icons[String(props.icon)]}
     </ColorlibStepIconRoot>
   )
 }
 
-const steps = ['Account credentials', 'Profile info', 'Profile picture', 'Preferred topics']
+const steps = ['Account credentials', 'Profile info', 'Profile picture']
+
+//----------------------------------------------------------------
 
 export default function PersonalRegister() {
-  const router = useRouter()
-  const mdUp = useResponsive('up', 'md')
-
-  // --- States cần cho RegisterForms ---
+  let redirectUrl = ''
+  const [cropper, setCropper] = useState<any>(null)
+  const getCropData = async () => {
+    if (cropper) {
+      const file = await fetch(cropper.getCroppedCanvas().toDataURL())
+        .then((res) => res.blob())
+        .then((blob) => {
+          return new File([blob], 'avatar.png', { type: 'image/png' })
+        })
+      if (file) {
+        const formData = new FormData()
+        formData.append('file', file)
+        // formData.append('public_id', 'testttt@gmail.com1');
+        formData.append('upload_preset', `${process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}`)
+        return await fetch(
+          `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+          {
+            method: 'POST',
+            body: formData
+          }
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.secure_url !== '') {
+              const uploadedFileUrl = data.secure_url
+              return uploadedFileUrl
+            }
+          })
+          .catch((err) => console.error(err))
+      }
+    }
+  }
   const [formValues, setFormValues] = useState<Register>({
     email: '',
     password: '',
@@ -138,8 +217,6 @@ export default function PersonalRegister() {
     firstname: '',
     lastname: '',
     slug: '',
-    address: '',
-    bio: '',
     gender: true,
     preferences: []
   })
@@ -149,96 +226,191 @@ export default function PersonalRegister() {
     passwordConfirm: true,
     firstname: true,
     lastname: true,
-    slug: true,
     address: true,
     bio: true,
     gender: true,
-    preferences: []
+    slug: true
   })
-  const [cropper, setCropper] = useState<any>(null)
+  const [success, setSuccess] = useState<boolean>(false)
+  const { setSnack } = useSnackbar()
 
-  // --- Điều hướng bước ---
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const checkFormValues = (fields: (keyof Register)[]) => {
+    let values = { ...formValues }
+    let errors = { ...formErrors }
+    let hasError = false
+    fields.forEach((field) => {
+      if (values[field] === '') {
+        errors[field] = false
+        hasError = true
+      } else {
+        errors[field] = true
+      }
+    })
+    setFormErrors(errors)
+    return hasError
+  }
+
+  const handleSubmit = async () => {
+    var avatar = await getCropData()
+    setIsSubmitting(true)
+    axios
+      .post(UrlConfig.user.signup, { ...formValues, avatar: avatar })
+      .then((res: any) => {
+        setSuccess(true)
+      })
+      .catch((err: any) => {
+        setIsSubmitting(false)
+        setSnack({
+          open: true,
+          message: err.response?.data?.message,
+          type: 'error'
+        })
+      })
+  }
+  const mdUp = useResponsive('up', 'md')
+
   const [activeStep, setActiveStep] = useState(0)
-  const isLast = activeStep === steps.length - 1
+  const isLastStep = activeStep === steps.length - 1
 
-  const handleNext = () => {
-    setActiveStep((s) => s + 1)
+  function _sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
   }
-  const handleBack = () => {
-    setActiveStep((s) => s - 1)
+
+  async function _submitForm(values: any, actions: any) {
+    await _sleep(1000)
+    alert(JSON.stringify(values, null, 2))
+    actions.setSubmitting(false)
+
+    setActiveStep(activeStep + 1)
   }
-  const handleFinish = () => {
-    router.push('/register-success')
+
+  function _handleSubmit() {
+    if (isLastStep) {
+      // _submitForm(values, actions);
+      // var avatar = ;
+      handleSubmit()
+    } else if (activeStep === 0) {
+      const hasError = checkFormValues(['email', 'password', 'passwordConfirm'])
+      if (!hasError) {
+        setActiveStep(activeStep + 1)
+      }
+    } else if (activeStep === 1) {
+      const hasError = checkFormValues(['firstname', 'lastname', 'address', 'bio'])
+      if (!hasError) {
+        setActiveStep(activeStep + 1)
+      }
+    } else {
+      setActiveStep(activeStep + 1)
+    }
+  }
+
+  function _handleBack() {
+    setActiveStep(activeStep - 1)
   }
 
   return (
     <>
-      <StyledRoot>
-        <StyledForm>
-          <Link href='/register'>
-            <IconButton sx={{ position: 'absolute', left: 35, top: 25 }}>
-              <ArrowBack />
-            </IconButton>
-          </Link>
+      <CustomSnackbar />
+      <title> Signup | Beegin </title>
+      {!success ? (
+        <StyledRoot>
+          <StyledForm>
+            <Link href='/register'>
+              <IconButton sx={{ position: 'absolute', left: '35px', top: '25px' }}>
+                <ArrowBack></ArrowBack>
+              </IconButton>
+            </Link>
+            <StyledContent>
+              <Box>
+                <Image src={logoMobile} alt='logo' width={38} style={{ margin: '0' }} />
+                <Typography variant='h4' gutterBottom className='mt-6 mb-6'>
+                  Create a new account
+                </Typography>
 
-          <StyledContent>
-            <Box>
-              <Image src={logoMobile} alt='logo' width={38} height={38} />
-              <Typography variant='h4' gutterBottom sx={{ mt: 6, mb: 6 }}>
-                Create a new account
-              </Typography>
+                <Stepper alternativeLabel activeStep={activeStep} connector={<ColorlibConnector />}>
+                  {steps.map((label) => (
+                    <Step key={label}>
+                      <StepLabel StepIconComponent={ColorlibStepIcon}>{label}</StepLabel>
+                    </Step>
+                  ))}
+                </Stepper>
+              </Box>
 
-              <Stepper alternativeLabel activeStep={activeStep} connector={<ColorlibConnector />}>
-                {steps.map((label) => (
-                  <Step key={label}>
-                    <StepLabel StepIconComponent={ColorlibStepIcon}>{label}</StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
-            </Box>
+              <RegisterForms
+                step={activeStep}
+                formValues={formValues}
+                setFormValues={setFormValues}
+                setCropper={setCropper}
+                formErrors={formErrors}
+                setFormErrors={setFormErrors}
+              />
 
-            {/* Truyền đầy đủ props cho RegisterForms */}
-            <RegisterForms
-              step={activeStep}
-              formValues={formValues}
-              formErrors={formErrors}
-              setFormValues={setFormValues}
-              setFormErrors={setFormErrors}
-              setCropper={setCropper}
-            />
+              <Stack direction={'row'} justifyContent={'space-between'} className='w-full'>
+                {activeStep !== 0 ? <Button onClick={_handleBack}>Back</Button> : <Box></Box>}
+                <div>
+                  <Button
+                    type='submit'
+                    variant='contained'
+                    color='primary'
+                    // disabled={
+                    //   isSubmitting || (activeStep === steps.length - 1)
+                    //     ? true
+                    //     : false
+                    // }
+                    onClick={_handleSubmit}
+                    //@ts-ignore
+                    sx={{
+                      background:
+                        isSubmitting || activeStep === steps.length - 1
+                          ? (theme) => `${theme.palette.action.disabledBackground}!important`
+                          : (theme) => `${theme.palette.secondary.main}!important`
+                      // ...((activeStep === steps.length - 1) && { color: 'blue' })
+                    }}
+                  >
+                    {activeStep === 2 && cropper === null ? (
+                      'Skip'
+                    ) : isLastStep ? (
+                      isSubmitting ? (
+                        <CircularProgress
+                          size={15}
+                          sx={{ color: (theme) => theme.palette.secondary.dark, margin: '5px 20px' }}
+                        />
+                      ) : (
+                        'Register'
+                      )
+                    ) : (
+                      'Next'
+                    )}
+                  </Button>
+                </div>
+              </Stack>
+            </StyledContent>
+          </StyledForm>
 
-            <Stack direction='row' justifyContent='space-between' sx={{ width: '100%' }}>
-              {activeStep > 0 ? <Button onClick={handleBack}>Back</Button> : <Box width={75} />}
-
-              <Button
-                variant='contained'
-                onClick={isLast ? handleFinish : handleNext}
-                sx={{ background: (theme) => theme.palette.secondary.main, color: '#fff' }}
+          {mdUp && (
+            <StyledBanner>
+              <Box
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  position: 'relative'
+                }}
               >
-                {isLast ? 'Finish' : 'Next'}
-              </Button>
-            </Stack>
-          </StyledContent>
-        </StyledForm>
-
-        {mdUp && (
-          <Box
-            sx={{
-              width: '42%',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              margin: 1,
-              borderTopLeftRadius: BORDER_RADIUS,
-              borderBottomLeftRadius: BORDER_RADIUS
-            }}
-          >
-            <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
-              <Image src={SignupBanner} alt='signup' fill style={{ objectFit: 'cover', borderRadius: BORDER_RADIUS }} />
-            </Box>
-          </Box>
-        )}
-      </StyledRoot>
+                <Image
+                  style={{ objectFit: 'cover', borderRadius: BORDER_RADIUS }}
+                  fill
+                  src={SignupBanner}
+                  alt='signup'
+                />
+              </Box>
+            </StyledBanner>
+          )}
+        </StyledRoot>
+      ) : (
+        <RegistrationComplete />
+      )}
     </>
   )
 }

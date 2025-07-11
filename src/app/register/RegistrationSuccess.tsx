@@ -1,19 +1,31 @@
-'use client'
-
 import React, { useState, useEffect } from 'react'
 import { Typography } from '@mui/material'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import Verified from '@/assets/Verify.png'
+import useResponsive from '@/hooks/useResponsive'
 
 const RegistrationComplete = () => {
+  const isMobile = useResponsive('down', 'sm')
   const [fadeIn, setFadeIn] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
-    const timer = setTimeout(() => setFadeIn(true), 100)
-    return () => clearTimeout(timer)
-  }, [])
+    // Trigger the fade-in effect after a short delay
+    const fadeTimer = setTimeout(() => setFadeIn(true), 100)
 
-  const containerStyle = {
+    // Redirect to login after showing the message
+    const redirectTimer = setTimeout(() => {
+      router.push('/login')
+    }, 2000) // 2 seconds delay before redirect
+
+    return () => {
+      clearTimeout(fadeTimer)
+      clearTimeout(redirectTimer)
+    }
+  }, [router])
+
+  const containerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -22,13 +34,21 @@ const RegistrationComplete = () => {
     height: '100%',
     opacity: fadeIn ? 1 : 0,
     transition: 'opacity 1s ease-in-out'
-  } as React.CSSProperties
+  }
 
   return (
     <div style={containerStyle}>
-      <Image src={Verified} alt='success_img' width={700} height={200} />
-      <Typography variant='h5' sx={{ mt: 2, px: 2, textAlign: 'center' }}>
-        Account Created Successfully! Please verify your email.
+      <Image src={Verified} alt='success_img' width={200} height={200} />
+      <Typography
+        variant='h1'
+        style={{
+          fontSize: isMobile ? '17px' : '30px',
+          marginTop: '15px',
+          textAlign: 'center',
+          padding: '0 10px'
+        }}
+      >
+        Registration successful!
       </Typography>
     </div>
   )

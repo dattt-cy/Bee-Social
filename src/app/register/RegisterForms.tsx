@@ -10,13 +10,12 @@ import {
   Select,
   MenuItem,
   IconButton,
-  Button,
-  Typography
 } from '@mui/material'
 import { Delete } from '@mui/icons-material'
 import { useState, ChangeEvent } from 'react'
 import { Register } from '@/types/register'
 import ImageCropper from '@/components/common/ImageCropper'
+import useAxiosPrivate from '@/hooks/useAxiosPrivate'
 
 interface RegisterFormsProps {
   step: number
@@ -37,7 +36,6 @@ const RegisterForms = ({
 }: RegisterFormsProps) => {
   const [editMode, setEditMode] = useState(false)
   const [newAvatar, setNewAvatar] = useState('')
-
   const getNewAvatar = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setEditMode(true)
@@ -53,40 +51,12 @@ const RegisterForms = ({
     })
     setFormErrors({
       ...formErrors,
-      [name]: value.length > 0
+      [name]: value.length > 0 ? true : false
     })
-  }
-
-  // Sử dụng mock static topics
-  const [topics, setTopics] = useState([
-    { _id: '1', name: 'Technology', isChecked: false },
-    { _id: '2', name: 'Health', isChecked: false },
-    { _id: '3', name: 'Music', isChecked: false },
-    { _id: '4', name: 'Art', isChecked: false },
-    { _id: '5', name: 'Gaming', isChecked: false }
-  ])
-
-  const handleCheckboxTick = (topic: any, index: number) => {
-    const changedTopics = [...topics]
-    changedTopics[index].isChecked = !changedTopics[index].isChecked
-    setTopics(changedTopics)
-
-    if (formValues.preferences.includes(topic._id)) {
-      setFormValues({
-        ...formValues,
-        preferences: formValues.preferences.filter((p: string) => p !== topic._id)
-      })
-    } else {
-      setFormValues({
-        ...formValues,
-        preferences: [...formValues.preferences, topic._id]
-      })
-    }
   }
 
   return (
     <form className='w-full'>
-      {/* Step 0 */}
       <FormGroup sx={{ display: step === 0 ? '' : 'none' }}>
         <Stack spacing={3} className='w-full px-5'>
           <TextField
@@ -110,7 +80,7 @@ const RegisterForms = ({
           />
           <TextField
             error={!formErrors.passwordConfirm}
-            id='passwordConfirm'
+            id='password'
             name='passwordConfirm'
             type='password'
             label='Confirm Password'
@@ -120,8 +90,6 @@ const RegisterForms = ({
           />
         </Stack>
       </FormGroup>
-
-      {/* Step 1 */}
       <FormGroup sx={{ display: step === 1 ? '' : 'none' }}>
         <Stack spacing={3} className='w-full px-5'>
           <Stack direction='row' spacing={3}>
@@ -148,9 +116,9 @@ const RegisterForms = ({
             error={!formErrors.slug}
             id='slug'
             name='slug'
-            label='Username'
+            label='username'
             value={formValues.slug}
-            helperText={!formErrors.slug && 'Please fill in your username'}
+            helperText={!formErrors.slug && 'Please fill in your slug'}
             onChange={handleTextFieldChange}
           />
           <Stack direction='row' spacing={3}>
@@ -158,30 +126,34 @@ const RegisterForms = ({
               error={!formErrors.address}
               id='address'
               name='address'
+              type='address'
               label='Address'
               value={formValues.address}
               helperText={!formErrors.address && 'Please fill in your address'}
               onChange={handleTextFieldChange}
-              sx={{ width: '200%' }}
+              sx={{ width: "200%" }}
             />
             <FormControl fullWidth>
-              <InputLabel id='gender-label'>Gender</InputLabel>
+              <InputLabel id='demo-simple-select-label'>Gender</InputLabel>
               <Select
-                labelId='gender-label'
-                id='gender'
-                value={formValues.gender ? 1 : 0}
+                labelId='demo-simple-select-label'
+                id='demo-simple-select'
+                value={formValues.gender === true ? 1 : 0}
                 label='Gender'
-                onChange={(e) => setFormValues({ ...formValues, gender: e.target.value === 1 })}
+                onChange={(e) => setFormValues({ ...formValues, gender: e.target.value === 1 ? true : false })}
               >
                 <MenuItem value={1}>Male</MenuItem>
                 <MenuItem value={0}>Female</MenuItem>
               </Select>
             </FormControl>
           </Stack>
+
+
           <TextField
             error={!formErrors.bio}
             id='bio'
             name='bio'
+            type='bio'
             label='Bio'
             value={formValues.bio}
             helperText={!formErrors.bio && 'Please fill in your bio'}
@@ -189,69 +161,65 @@ const RegisterForms = ({
           />
         </Stack>
       </FormGroup>
-
-      {/* Step 2: Avatar */}
       <FormGroup sx={{ display: step === 2 ? '' : 'none' }}>
-        <Stack direction='row' alignItems='center' justifyContent='center'>
+        <Stack direction={'row'} alignItems={'center'} justifyContent={'center'}>
           {editMode ? (
             <ImageCropper cancelEdit={() => setEditMode(false)} avatarUrl={newAvatar} setCropper={setCropper} />
           ) : (
+            // <input
+            //   type="file"
+            //   accept="image/png, image/jpeg, image/jpg"
+            //   onChange={getNewAvatarUrl}
+            //   className="mt-2 border border-solid border-black py-2 px-4 rounded cursor-pointer h-[300px] w-[300px] before:content-['Upload image']"
+            // />
             <div className='flex items-center justify-center w-full'>
               <label
                 htmlFor='dropzone-file'
-                className='flex flex-col items-center justify-center w-[300px] h-[300px] border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-white'
+                className='flex flex-col items-center justify-center w-[300px] h-[300px] border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-white hover:bg-white dark:border-gray-200 dark:hover:border-gray-100 dark:hover:bg-gray-100'
               >
-                {/* SVG icon và text giữ nguyên */}
-                <svg className='w-8 h-8 mb-4 text-violet-800' viewBox='0 0 20 16' fill='none'>
-                  <path
-                    d='M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2'
-                    stroke='currentColor'
-                    strokeWidth='2'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                  />
-                </svg>
-                <p className='mb-2 text-sm text-violet-800'>
-                  <span className='font-semibold'>Click to upload</span> or just skip for now
-                </p>
-                <p className='text-xs text-violet-800'>SVG, PNG, JPG or GIF</p>
-                <input id='dropzone-file' type='file' accept='image/*' onChange={getNewAvatar} className='hidden' />
+                <div className='flex flex-col items-center justify-center pt-5 pb-6'>
+                  <svg
+                    className='w-8 h-8 mb-4 text-violet-800 dark:text-violet-600'
+                    aria-hidden='true'
+                    xmlns='http://www.w3.org/2000/svg'
+                    fill='none'
+                    viewBox='0 0 20 16'
+                  >
+                    <path
+                      stroke='currentColor'
+                      stroke-linecap='round'
+                      stroke-linejoin='round'
+                      stroke-width='2'
+                      d='M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2'
+                    />
+                  </svg>
+                  <p className='mb-2 text-sm text-violet-800 dark:text-violet-600'>
+                    <span className='font-semibold'>Click to upload</span> or just skip for now
+                  </p>
+                  <p className='text-xs text-violet-800 dark:text-violet-600'>SVG, PNG, JPG or GIF</p>
+                </div>
+                <input
+                  id='dropzone-file'
+                  type='file'
+                  accept='image/png, image/jpeg, image/jpg'
+                  onChange={getNewAvatar}
+                  className='hidden'
+                />
+                {/* <input id="dropzone-file" type="file" class="hidden" /> */}
               </label>
             </div>
           )}
           {editMode && (
-            <Stack direction='column' sx={{ ml: 2 }} spacing={1}>
-              <IconButton
-                onClick={() => {
-                  setEditMode(false)
-                  setCropper(null)
-                }}
-              >
+            <Stack direction={'column'} sx={{ ml: 2 }} spacing={1}>
+              {/* <IconButton><Edit /></IconButton> */}
+              <IconButton onClick={() => { setEditMode(false); setCropper(null); }}>
                 <Delete />
               </IconButton>
             </Stack>
           )}
         </Stack>
       </FormGroup>
-
-      {/* Step 3: Categories */}
-      <FormGroup sx={{ display: step === 3 ? '' : 'none' }}>
-        <Box className='w-full px-5 text-center'>
-          <Typography variant='h4' sx={{ fontSize: '14px', color: (theme) => theme.palette.secondary.main, mb: 2 }}>
-            Choose at least 3 categories you'd prefer to see
-          </Typography>
-          {topics.map((topic, index) => (
-            <Button
-              key={index}
-              sx={{ m: '8px' }}
-              variant={topic.isChecked ? 'contained' : 'outlined'}
-              onClick={() => handleCheckboxTick(topic, index)}
-            >
-              {topic.name}
-            </Button>
-          ))}
-        </Box>
-      </FormGroup>
+     
     </form>
   )
 }

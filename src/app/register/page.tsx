@@ -1,20 +1,53 @@
 /* eslint-disable @next/next/no-img-element */
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 // @mui
 import { styled } from '@mui/material/styles'
-import { Container, Typography, Stack, Button, Box, IconButton } from '@mui/material'
-import { ArrowBack } from '@mui/icons-material'
-import Image from 'next/image'
-import Link from 'next/link'
-import { GiTreeBeehive, GiBeehive } from 'react-icons/gi'
-import { useRouter } from 'next/navigation'
+import {
+  Container,
+  Typography,
+  Stack,
+  Button,
+  Step,
+  StepLabel,
+  StepIcon,
+  Box,
+  Stepper,
+  CircularProgress,
+  IconButton
+} from '@mui/material'
+import { ArrowBack, LogoDev } from '@mui/icons-material'
+import { LockPerson, PersonSearch, AddAPhoto, Check, Favorite } from '@mui/icons-material'
+import StepConnector, { stepConnectorClasses } from '@mui/material/StepConnector'
+import { StepIconProps } from '@mui/material/StepIcon'
+import axios from 'axios'
+import UrlConfig from '@/theme/shadows'
+import RegistrationComplete from './RegistrationSuccess'
+import { GiTreeBeehive } from 'react-icons/gi'
+import { GiBeehive } from 'react-icons/gi'
+
+// hooks
 import useResponsive from '@/hooks/useResponsive'
+import { useEffect, useState } from 'react'
+
+// auth
+import { signIn, useSession } from 'next-auth/react'
+
+// components
+import Image from 'next/image'
+import RegisterForms from './RegisterForms'
 
 // assets
 import Banner from '@/assets/register_option_banner.jpg'
+import CustomSnackbar from '@/components/common/Snackbar'
+import useSnackbar from '@/context/snackbarContext'
+import { sassFalse } from 'sass'
+import Link from 'next/link'
 import logoMobile from '@/assets/logoMobile.png'
+import { useRouter } from 'next/navigation'
+
+//----------------------------------------------------------------
 
 const BORDER_RADIUS = '16px'
 
@@ -73,6 +106,7 @@ const StyledContent = styled('div')(({ theme }) => ({
     maxWidth: 480,
     margin: 'auto',
     display: 'flex',
+    justifyContent: 'space-between',
     flexDirection: 'column',
     padding: theme.spacing(10, 0),
     alignItems: 'center',
@@ -80,67 +114,63 @@ const StyledContent = styled('div')(({ theme }) => ({
   }
 }))
 
-export default function Register() {
-  const [isPersonal, setIsPersonal] = useState(true)
-  const router = useRouter()
-  const mdUp = useResponsive('up', 'md')
+//----------------------------------------------------------------
 
-  const _handleNext = () => {
-    router.push(isPersonal ? '/register/personal' : '/register/business')
+export default function Register() {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const mdUp = useResponsive('up', 'md')
+  const router = useRouter()
+
+  function _handleNext() {
+    router.push('/register/personal')
   }
 
   return (
     <>
-      <title>Signup | Beegin</title>
+      <title> Signup | Beegin </title>
       <StyledRoot>
         <StyledForm>
           <Link href='/login'>
-            <IconButton sx={{ position: 'absolute', left: 35, top: 25 }}>
-              <ArrowBack />
+            <IconButton sx={{ position: 'absolute', left: '35px', top: '25px' }}>
+              <ArrowBack></ArrowBack>
             </IconButton>
           </Link>
-
           <StyledContent>
             <Box>
-              <Image src={logoMobile} alt='logo' width={38} height={38} />
+              <Image src={logoMobile} alt='logo' width={38} style={{ margin: '0' }} />
               <Typography variant='h4' gutterBottom className='mt-6 mb-3 text-2xl'>
-                Choose your account type
+                Create your account
               </Typography>
               <Typography variant='subtitle2' sx={{ fontSize: '13px' }}>
-                Pick an account type based on your need. We offer a wealth experience regardless of the option you
-                choose
+                Join our community and start interacting with your fellow bees
               </Typography>
             </Box>
 
-            <Box sx={{ my: '35px' }}>
+            <Box sx={{ marginY: '35px' }}>
               <Button
-                variant={isPersonal ? 'contained' : 'outlined'}
-                disabled={isPersonal}
-                onClick={() => setIsPersonal(true)}
+                variant='contained'
                 sx={{
                   width: '100%',
-                  my: 1,
-                  borderRadius: '12px',
-                  '&:disabled .MuiTypography-h5': { color: (theme) => theme.palette.common.white },
-                  '&:disabled .MuiTypography-subtitle2': { color: (theme) => theme.palette.grey[100] }
+                  margin: '10px 0',
+                  borderRadius: '12px'
                 }}
               >
-                <Stack direction='row' alignItems='center' sx={{ width: '100%' }}>
+                <Stack direction={'row'} alignItems='center' justifyContent='start' sx={{ width: '100%' }}>
                   <Box
                     sx={{
-                      fontSize: 28,
-                      background: (theme) => (isPersonal ? theme.palette.common.white : theme.palette.secondary.main),
-                      color: (theme) => (isPersonal ? theme.palette.secondary.main : theme.palette.common.white),
-                      p: '10px',
-                      m: '10px 5px',
+                      fontSize: '28px',
+                      background: (theme) => theme.palette.common.white,
+                      color: (theme) => theme.palette.secondary.main,
+                      padding: '10px 10px',
+                      margin: '10px 5px',
                       borderRadius: '12px'
                     }}
                   >
                     <GiTreeBeehive />
                   </Box>
-                  <Box sx={{ ml: 2 }}>
-                    <Typography variant='h5' sx={{ lineHeight: 1.25, mb: 0.5 }}>
-                      Personal
+                  <Box sx={{ marginLeft: '15px' }}>
+                    <Typography variant='h5' sx={{ textAlign: 'left', lineHeight: 1.25, marginBottom: '5px' }}>
+                      Personal Account
                     </Typography>
                     <Typography variant='subtitle2' sx={{ textTransform: 'initial' }}>
                       Start interacting with your fellow bees
@@ -148,47 +178,11 @@ export default function Register() {
                   </Box>
                 </Stack>
               </Button>
-
-              <Button
-                variant={!isPersonal ? 'contained' : 'outlined'}
-                disabled={!isPersonal}
-                onClick={() => setIsPersonal(false)}
-                sx={{
-                  width: '100%',
-                  my: 1,
-                  borderRadius: '12px',
-                  '&:disabled .MuiTypography-h5': { color: (theme) => theme.palette.common.white },
-                  '&:disabled .MuiTypography-subtitle2': { color: (theme) => theme.palette.grey[100] }
-                }}
-              >
-                <Stack direction='row' alignItems='center' sx={{ width: '100%' }}>
-                  <Box
-                    sx={{
-                      fontSize: 28,
-                      background: (theme) => (!isPersonal ? theme.palette.common.white : theme.palette.secondary.main),
-                      color: (theme) => (!isPersonal ? theme.palette.secondary.main : theme.palette.common.white),
-                      p: '10px',
-                      m: '10px 5px',
-                      borderRadius: '12px'
-                    }}
-                  >
-                    <GiBeehive />
-                  </Box>
-                  <Box sx={{ ml: 2 }}>
-                    <Typography variant='h5' sx={{ lineHeight: 1.25, mb: 0.5 }}>
-                      Business
-                    </Typography>
-                    <Typography variant='subtitle2' sx={{ textTransform: 'initial' }}>
-                      Further promote your business
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Button>
             </Box>
 
-            <Stack direction='row' justifyContent='start' sx={{ width: '100%' }}>
-              <Button variant='contained' sx={{ p: '8px 25px' }} onClick={_handleNext}>
-                Next Step
+            <Stack direction={'row'} justifyContent={'start'} className='w-full'>
+              <Button variant='contained' sx={{ padding: '8px 25px' }} onClick={_handleNext}>
+                Create Account
               </Button>
             </Stack>
           </StyledContent>
@@ -196,8 +190,14 @@ export default function Register() {
 
         {mdUp && (
           <StyledBanner>
-            <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
-              <Image src={Banner} alt='signup' fill style={{ objectFit: 'cover', borderRadius: BORDER_RADIUS }} />
+            <Box
+              sx={{
+                width: '100%',
+                height: '100%',
+                position: 'relative'
+              }}
+            >
+              <Image style={{ objectFit: 'cover', borderRadius: BORDER_RADIUS }} fill src={Banner} alt='signup' />
             </Box>
           </StyledBanner>
         )}
