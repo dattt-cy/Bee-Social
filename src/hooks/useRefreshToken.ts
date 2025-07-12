@@ -1,27 +1,40 @@
-import axios from '@/axios'
+// hooks/useRefreshToken.ts
+import { axiosPrivate } from '@/axios' // dùng chung axiosPrivate có withCredentials
 import { useAuth } from '@/context/AuthContext'
 import UrlConfig from '@/config/urlConfig'
 import { useRouter } from 'next/navigation'
 
 const useRefreshToken = () => {
-  const { setAccessToken, setUser, user } = useAuth()
+  const { setAccessToken, setUser } = useAuth()
   const router = useRouter()
 
-  const refresh = async () => {
+  const refresh = async (): Promise<string> => {
     try {
-      const response = await axios.get(`${UrlConfig.user.refresh}`, {
+      const response = await axiosPrivate.get(UrlConfig.user.refresh, {
         withCredentials: true
       })
-      setAccessToken(response.data.token)
-      setUser(response.data.data.user)
-      return response.data.token
+      const { token, data } = response.data
+      // 1. Cập nhật Context & localStorage
+      setAccessToken(token)
+      setUser(data.user)
+      localStorage.setItem('accessToken', token)
+      return token
     } catch (err: any) {
-      if (err.response.status === 401 || err.response.status === 403) {
-        router.push('/login')
+      const status = err?.response?.status
+      if (status === 401 || status === 403) {
+        // 2. Clear toàn bộ state cũ
+        setAccessToken('')
+        setUser(null)
+        localStorage.removeItem('accessToken')
         localStorage.removeItem('persist')
+        // 3. Redirect về login
+        router.push('/login')
       }
+      // 4. Ném lỗi để interceptor không retry vô ích
+      throw err
     }
   }
+
   return refresh
 }
 

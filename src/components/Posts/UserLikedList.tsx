@@ -1,6 +1,6 @@
-'use client'
 import React from 'react'
 import { useEffect } from 'react'
+import ListFollowCard from '../ListFollowing/ListFollowCard'
 import { Modal, Box } from '@mui/material'
 import useResponsive from '@/hooks/useResponsive'
 import InfiniteScroll from 'react-infinite-scroll-component'
@@ -61,8 +61,7 @@ const UserList = ({ open, handleClose, propFetchMoreData }: UserListProps) => {
           loader={<></>}
           scrollableTarget='userList'
         >
-          {/* Add your user list rendering here, for now just an empty fragment */}
-          <></>
+          {dataUser?.map((user, index) => <ListFollowCard key={index} user={user} />)}
         </InfiniteScroll>
       </Box>
     </Modal>

@@ -177,7 +177,7 @@ const PostCard = ({ post, isRepost, postParent }: PostCardProps) => {
     videoRef.current?.pause()
     const commentResponse = await axiosPrivate.get(`${UrlConfig.posts.getComments(post._id)}?limit=10&page=1`)
     const comments = commentResponse.data.data as Comment[]
-    // const isFollowing = await axiosPrivate.get(UrlConfig.me.isFollowingOtherUser(post.user._id))
+
     postsDispatch({
       type: 'SELECT_POST',
       payload: { ...post, comments, totalComments: commentResponse.data.total, isFollowing: true }
@@ -209,12 +209,8 @@ const PostCard = ({ post, isRepost, postParent }: PostCardProps) => {
   }
 
   async function handleReportPost() {
-    const result = await axiosPrivate.post(UrlConfig.posts.reportPost, { post: post._id, reason: reason })
-
-    if (result) {
-      setOpenReportModal(false)
-      setSnack({ open: true, message: 'Reported post successfully', type: 'success' })
-    }
+    setOpenReportModal(false)
+    setSnack({ open: true, message: 'Report feature is temporarily disabled', type: 'info' })
   }
 
   async function handleDeletePost() {
@@ -374,18 +370,7 @@ const PostCard = ({ post, isRepost, postParent }: PostCardProps) => {
               <Typography variant={isMobile ? 'h5' : 'h4'} sx={{ fontWeight: 'bold', fontSize: '16px' }}>
                 {post.user?.profile?.firstname + ' ' + post.user?.profile?.lastname}
               </Typography>
-              {post.user.role == 'business' && (
-                <VerifiedRoundedIcon
-                  sx={{
-                    fontSize: '22px',
-                    marginLeft: '10px'
-                    // position: 'absolute',
-                    // bottom: '-2px',
-                    // right: '-6px'
-                  }}
-                  color='secondary'
-                />
-              )}
+
               <Typography
                 sx={{
                   color: 'rgba(0, 0, 0, 0.50)',
@@ -418,12 +403,6 @@ const PostCard = ({ post, isRepost, postParent }: PostCardProps) => {
               >
                 {timeSince(new Date(post.createdAt))}
               </Typography>
-              {post.type === 'advertisement' && (
-                <Chip label={t('Sponsored')} variant='outlined' color='secondary' sx={{ marginLeft: '15px' }} />
-              )}
-              {post.type === 'suggested' && (
-                <Chip label={t('Suggested')} variant='outlined' color='secondary' sx={{ marginLeft: '15px' }} />
-              )}
             </Stack>
             <Popover
               icon={<MoreVert />}
@@ -505,8 +484,18 @@ const PostCard = ({ post, isRepost, postParent }: PostCardProps) => {
               }
             })}
           </ImageContainerStyled>
-          {post?.images?.length !== 0 && postParent && <ReplyPostCard post={postParent as Post} />}
-          {post?.images?.length === 0 && postParent && <PostCard post={postParent as Post} isRepost={true} />}
+
+          {/* Hiển thị parent post thống nhất */}
+          {(post.parent || postParent) && (
+            <>
+              {post?.images?.length !== 0 && (post.parent || postParent) && (
+                <ReplyPostCard post={(post.parent || postParent) as Post} />
+              )}
+              {post?.images?.length === 0 && (post.parent || postParent) && (
+                <PostCard post={(post.parent || postParent) as Post} isRepost={true} />
+              )}
+            </>
+          )}
           {!isRepost && (
             <Stack
               direction={'row'}

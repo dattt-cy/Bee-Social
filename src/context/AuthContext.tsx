@@ -45,8 +45,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     // set isAuthenticated to true if have cookie in browser name 'jwt'
-    if (localStorage.getItem('persist')) {
+    const storedUser = localStorage.getItem('user')
+    const persisted = localStorage.getItem('persist') === 'persist'
+    const storedAccessToken = localStorage.getItem('accessToken')
+
+    if (persisted && storedUser && storedAccessToken) {
       setIsAuthenticated(true)
+      setUser(JSON.parse(storedUser)) 
+      setAccessToken(storedAccessToken)
     }
   }, [])
 

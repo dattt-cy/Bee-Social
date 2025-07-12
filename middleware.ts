@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
-  const protectedPaths = ['/explore', '/messages', '/message/[id]', '/profile', '/settings', '/']
+  const protectedPaths = ['/profile', '/']
 
   const isPathProtected = protectedPaths?.some((path) => pathname == path || pathname.startsWith(path))
   const res = NextResponse.next()

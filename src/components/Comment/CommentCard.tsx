@@ -26,6 +26,7 @@ import { usePosts } from '@/context/PostContext'
 import { User } from '@/types/user'
 import UserLikedList from '@/components/Posts/UserLikedList'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
+import { useAuth } from '@/context/AuthContext'
 
 interface CommentCardProps {
   postId: string
@@ -46,6 +47,7 @@ const CommentCard = ({ postId, comment, replyComment }: CommentCardProps) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const [isEditing, setIsEditing] = React.useState(false)
   const [editContent, setEditContent] = React.useState(comment.content)
+  const { user } = useAuth()
 
   const openMenu = Boolean(anchorEl)
 
@@ -340,7 +342,7 @@ const CommentCard = ({ postId, comment, replyComment }: CommentCardProps) => {
         />
 
         {/* 3 chấm chỉ hiện khi hover và không đang chỉnh sửa */}
-        {hover && !isEditing && (
+        {hover && !isEditing && user && comment.user._id === user._id && (
           <IconButton size='small' onClick={handleMenuClick} sx={{ position: 'absolute', top: 8, right: 8 }}>
             <MoreVertIcon fontSize='small' />
           </IconButton>

@@ -8,5 +8,10 @@
   "SignInTo": "Sign in to Beegin",
   "DontHaveAccount": "Don’t have an account yet?",
   "GetStarted": "Get started",
-  "Username": "Username"
+  "Username": "Username",
+  "Home": "Home",
+  "Explore": "Explore",
+  "Messages": "Messages",
+  "Profile": "Profile",
+  "Search": "Search"
 }

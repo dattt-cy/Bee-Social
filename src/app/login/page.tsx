@@ -34,6 +34,7 @@ import Image from 'next/image'
 // assets
 import LoginBanner from '@/assets/login_banner.jpg'
 import { useAuth } from '@/context/AuthContext'
+// import the correct urlConfig that has a 'user' property
 import urlConfig from '@/config/urlConfig'
 import Snackbar from '@/components/common/Snackbar'
 import useSnackbar from '@/context/snackbarContext'
@@ -95,7 +96,7 @@ const StyledContent = styled('div')(({ theme }) => ({
 //----------------------------------------------------------------
 
 export default function LoginPage() {
-  const { setIsAuthenticated, setAccessToken, setUser } = useAuth()
+  const { setIsAuthenticated, setAccessToken, setUser, user } = useAuth()
   const pathname = usePathname()
   const isMobile = useResponsive('down', 'md')
   const router = useRouter()
@@ -136,22 +137,21 @@ export default function LoginPage() {
       setIsAuthenticated(true)
       setAccessToken(resJson.token)
       setUser(user)
-      setUser(user)
-      //set local storage
+   
       localStorage.setItem('persist', 'persist')
+   
+      localStorage.setItem('user', JSON.stringify(user))
+    
+      localStorage.setItem('accessToken', resJson.token)
       localStorage.setItem('role', user.role)
-      if (user.role === 'admin') {
-        router.push('/admin/overview')
-      } else if (user.role === 'business') {
-        router.push('/business/advertisement')
-      } else {
-        router.push('/home')
-      }
+      router.push('/home')
     } else {
       setIsLoggingIn(false)
       setSnack({ open: true, type: 'error', message: resJson.message })
     }
   }
+
+  console.log('user', user)
 
   return (
     <>

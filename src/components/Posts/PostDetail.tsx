@@ -134,15 +134,10 @@ const PostDetail = ({ post, open, handleClose, handleLike, postParent }: PostDet
 
   const handleFollow = async (event: any) => {
     event.stopPropagation()
-    try {
-      if (isFollowing) {
-        setIsFollowing(false)
-        await axiosPrivate.delete(urlConfig.me.unFollowOtherUser(post.user._id))
-      } else {
-        setIsFollowing(true)
-        await axiosPrivate.post(urlConfig.me.followingOtherUser, { id: post.user._id })
-      }
-    } catch (error) {}
+
+    setIsFollowing(!isFollowing)
+
+    console.log('Follow feature temporarily disabled')
   }
 
   const navigateToProfile = (event: any) => {

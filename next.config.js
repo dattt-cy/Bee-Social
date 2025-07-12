@@ -17,7 +17,7 @@ const nextConfig = {
     ]
   },
   env: {
-    NEXT_APP_BEEGIN_DOMAIN: 'https://beegin.onrender.com',
+    NEXT_APP_BEEGIN_DOMAIN: 'http://localhost:8000',
     NEXTAUTH_URL: 'http://localhost:3000'
   },
   images: {

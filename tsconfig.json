@@ -30,7 +30,10 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/api/auth/[...nextauth]/route.js",
-    "src/app/admin/overview/chart.tsx"
-, "src/hooks/useWindow", "src/components/common/PersistentScrollView/index.js", "src/components/common/Avatar/BusinessAvatar/index.tsz"  ],
+    "src/app/admin/overview/chart.tsx",
+    "src/hooks/useWindow",
+    "src/components/common/PersistentScrollView/index.js",
+    "src/components/common/Avatar/BusinessAvatar/index.tsz"
+  ],
   "exclude": ["node_modules"]
 }
