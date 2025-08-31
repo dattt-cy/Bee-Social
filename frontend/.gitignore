@@ -1,0 +1,117 @@
+﻿# Original repositories (will be restructured as frontend/ and backend/)
+my-beegin/
+my-beeSocial-sever/
+
+# Environment variables
+.env
+.env*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+frontend/.env*
+backend/config.env
+
+# Dependencies
+node_modules/
+**/node_modules/
+.pnp
+.pnp.js
+
+# Frontend build outputs (Next.js)
+frontend/.next/
+frontend/out/
+frontend/build/
+.next/
+out/
+build/
+
+# Backend uploads and logs
+backend/uploads/
+backend/logs/
+uploads/
+
+# Testing
+coverage/
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+logs/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Cache directories
+.npm
+.eslintcache
+.cache
+.parcel-cache
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.pem
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Build artifacts
+build/
+dist/
+
+# Cloudinary cache
+.cloudinary/
+
+# Vercel
+.vercel
+
+# Database files
+*.sqlite
+*.db
+
+# Next.js video plugin
+videos/*
+!videos/*.json
+!videos/*.js
+!videos/*.ts
+public/_next-video
+
+# Archive files
+*.zip
+*.tar.gz
+*.rar
+
+# Backup files
+*.backup
+*.bak
+*.old
+
