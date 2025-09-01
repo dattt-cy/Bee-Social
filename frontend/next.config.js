@@ -17,8 +17,8 @@ const nextConfig = {
     ]
   },
   env: {
-    NEXT_APP_BEEGIN_DOMAIN: 'http://localhost:8000',
-    NEXTAUTH_URL: 'http://localhost:3000'
+    NEXT_APP_BEEGIN_DOMAIN: 'https://bee-social-sever-production-c2e9.up.railway.app',
+    NEXTAUTH_URL: 'https://bee-social-sever-production-c2e9.up.railway.app'
   },
   images: {
     domains: ['images.pexels.com', 'res.cloudinary.com']
