@@ -1,4 +1,5 @@
 'use client'
+import '@/utils/disableConsole'
 import './globals.css'
 import '@/styles/typing.css'
 import { Poppins } from 'next/font/google'
