@@ -29,9 +29,7 @@ export default function TrendingPostList() {
         user?.preferences.join(',') ?? '65392b8f96ed3a51de029346,653a96bd9bbda0b0c41d4b67,65392b7896ed3a51de029340'
       const response = await axios.get(UrlConfig.trending.getTrendingPosts(preferences))
       return response.data.data
-    } catch (err) {
-      console.log(err)
-    }
+    } catch (err) {}
   }
 
   return (

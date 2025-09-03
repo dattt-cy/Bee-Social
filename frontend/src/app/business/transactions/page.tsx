@@ -118,13 +118,9 @@ export default function Transaction() {
         }
         const response = await axiosPrivate.get(UrlConfig.admin.getTransactions, { params })
         // setRequests(response.data.data)
-        console.log('------------------', response.data)
-        console.log(response.data.data.data)
         setTransactions(response.data.data.data)
         setTotal(response.data.total)
-      } catch (err) {
-        console.log(err)
-      }
+      } catch (err) {}
     }
     fetchData()
   }, [page, requestStatus, rowsPerPage])
@@ -175,7 +171,7 @@ export default function Transaction() {
           >
             <MenuItem value=''></MenuItem>
             {status.map((state) => (
-              <MenuItem value={state}>
+              <MenuItem key={state} value={state}>
                 <em>{state}</em>
               </MenuItem>
             ))}

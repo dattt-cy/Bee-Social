@@ -50,7 +50,6 @@ function Friends({ userId }: { userId: string }) {
         setLoading(true)
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.log(error)
       } finally {
         setLoading(false)
       }
@@ -194,7 +193,6 @@ function Friends({ userId }: { userId: string }) {
           )
         ) : (
           (() => {
-            console.log('Rendering Skeletons...')
             return [...Array(5)].map((elementInArray, index) => (
               <Stack key={index} direction={'row'} alignItems={'center'} sx={{ margin: '15px 40px', padding: '10px' }}>
                 <Skeleton variant='circular' width={60} height={60} />

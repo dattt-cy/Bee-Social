@@ -34,8 +34,6 @@ function Home() {
       let feeds = response.data.data as Feed[]
       let { total } = response.data
 
-      console.log('FEEDS:', feeds) // In ra dữ liệu feed trả về từ API
-
       let posts = feeds.map((feed: Feed) => {
         return {
           ...feed.post,
@@ -52,7 +50,6 @@ function Home() {
       }
     } catch (error) {
       // Handle errors if necessary
-      console.log('FEED ERROR:', error)
     }
   }
   const { fetchNextPage, isFetching, hasNextPage } = useInfiniteQuery({

@@ -106,8 +106,6 @@ export const notifReducer = (state: NotifState, action: NotifAction) => {
         return true
       })
 
-      console.log(filteredNotifications)
-
       return {
         ...state,
         notifications: filteredNotifications,

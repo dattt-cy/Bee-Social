@@ -143,9 +143,7 @@ function page() {
       const response = await axiosPrivate.get(`${UrlConfig.posts.getMyPosts}?limit=10&page=${currentPage}`)
       let rslt = response.data
       return rslt
-    } catch (error) {
-      console.log(error)
-    }
+    } catch (error) {}
   }
 
   const getUsers = async () => {
@@ -167,9 +165,7 @@ function page() {
       try {
         await getUsers()
         await getNumberOfFollow()
-      } catch (error) {
-        console.log(error)
-      }
+      } catch (error) {}
     }
     fetchData()
   }, [open])

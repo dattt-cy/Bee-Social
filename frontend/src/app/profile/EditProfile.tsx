@@ -109,7 +109,7 @@ const ModalComponent = (props: ModalProps) => {
       }
       setLoading(true)
       let response = await axiosPrivate.patch(url, updatedData)
-      console.log(response.data.status)
+
       if (response.data.status === 'Success') {
         // router.refresh()
         toast.success('Profile updated successfully!', {

@@ -70,7 +70,6 @@ function getIcon(type: string) {
 }
 
 const CustomAvatar = ({ image, type, read }: CustomAvatarProps) => {
-  console.log('type', type)
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
       {read ? (

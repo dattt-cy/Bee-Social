@@ -27,7 +27,7 @@ function UserList({ f, limit }: UserListProps) {
           setLoading(true)
           const q = searchParams.get('q') ?? ''
           const response = await axios.get(UrlConfig.search.searchUsers(encodeURIComponent(q), limit))
-          console.log(response.data)
+
           setLoading(false)
           setProfiles(response.data.data)
         }

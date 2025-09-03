@@ -50,8 +50,6 @@ const useAxiosPrivate = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, refresh])
 
-  console.log('accessToken:', accessToken)
-
   return axiosPrivate
 }
 

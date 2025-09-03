@@ -20,9 +20,7 @@ function SuggestFollow() {
         const response = await axiosPrivate.get(UrlConfig.me.suggestFollow)
         const responseData = response.data.data
         setData(responseData)
-      } catch (error) {
-        console.log(error)
-      }
+      } catch (error) {}
     }
 
     fetchPosts()

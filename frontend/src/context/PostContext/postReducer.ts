@@ -69,7 +69,6 @@ export const postReducer = (state: PostState, action: PostAction) => {
       }
     }
     case 'UPDATE_POST': {
-      console.log(action.payload)
       return {
         ...state,
         posts: state.posts.map((item) => (item._id === action.payload._id ? action.payload : item)),
@@ -101,7 +100,6 @@ export const postReducer = (state: PostState, action: PostAction) => {
 
       let uniquePosts = uniquePostsArray.map((postId) => updatedPosts.find((post) => post._id === postId))
       if (uniquePosts.length === state.posts.length) uniquePosts = [...uniquePosts, updatedPosts[0]]
-      console.log(uniquePosts)
 
       return {
         ...state,

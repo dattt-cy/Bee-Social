@@ -78,9 +78,7 @@ const RegisterForms = ({
     const fetchData = async () => {
       try {
         await getTopics()
-      } catch (error) {
-        console.log(error)
-      }
+      } catch (error) {}
     }
     fetchData()
   }, [])
@@ -277,7 +275,7 @@ const RegisterForms = ({
             variant='h4'
             sx={{ fontSize: '14px', color: (theme) => theme.palette.secondary.main, marginBottom: '10px' }}
           >
-            Choose at least 3 categories you'd prefer to see
+            Choose at least 3 categories you&#39;d prefer to see
           </Typography>
           {topics.map((topic: any, index: number) => (
             <Button

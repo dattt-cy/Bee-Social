@@ -28,10 +28,8 @@ const PostDetailPage = ({ params }: { params: { id: string } }) => {
 
     // Check if commentID and parentId exist in searchParams
     const commentID = searchParams.get('commentId')
-    console.log('commentID', commentID)
-    const parentId = searchParams.get('parentCommentId')
-    console.log(parentId)
 
+    const parentId = searchParams.get('parentCommentId')
 
     if (parentId) {
       // Check if the comment exists in the selectedPost

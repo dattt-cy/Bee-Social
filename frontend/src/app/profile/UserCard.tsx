@@ -19,9 +19,7 @@ export default function CardUser(props: any) {
       } else {
         router.push(`/profile/${props.userId}`)
       }
-    } catch (error) {
-      console.log(error)
-    }
+    } catch (error) {}
   }
   const handleDataFromChild = (data: string) => {}
   return (

@@ -11,7 +11,6 @@ interface BusinessAvatarProps {
 
 const BusinessAvatar = ({ avatar, type, redirectToProfile }: BusinessAvatarProps) => {
   const isMobile = useResponsive('down', 'sm')
-  console.log(type)
 
   return (
     <>

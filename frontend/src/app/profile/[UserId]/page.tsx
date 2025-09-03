@@ -172,9 +172,7 @@ function page() {
       try {
         await getUsers(userId)
         await getNumberOfFollow(userId)
-      } catch (error) {
-        console.log(error)
-      }
+      } catch (error) {}
     }
     fetchData()
   }, [])
